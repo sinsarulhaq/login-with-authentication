@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema({
 })
 
 userSchema.methods.generateAuthToken = async function () {
-    const user = this
+     const user = this
     const token = jwt.sign({ _id: user._id.toString() }, 'thisismycode')
 
     user.tokens = user.tokens.concat({ token })
@@ -66,11 +66,12 @@ userSchema.statics.findByChecking = async (email, password) => {
     return user
 }
 
-userSchema.pre('save', async function () {
+userSchema.pre('save', async function (next) {
     const user = this
     if (user.isModified('password')) {
         user.password = await bcrypt.hash(user.password, 8)
     }
+    next()
 })
 
 const User = mongoose.model('User', userSchema)

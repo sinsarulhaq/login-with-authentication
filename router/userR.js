@@ -7,10 +7,20 @@ const router = new express.Router()
 router.post('/users', async (req, res) => {
     try {
         const user = await User(req.body)
+        const tokens = await user.generateAuthToken()
         await user.save()
-        res.status(201).send(user)
+        res.status(201).send({ user, tokens })
     } catch (e) {
         res.status(400).send(e)
+    }
+})
+
+router.get('/users', async(req, res)=>{
+    try{
+        const users = await User.find({  })
+        res.send(users)
+    }catch(e){
+        res.status(404).send(e)
     }
 })
 
