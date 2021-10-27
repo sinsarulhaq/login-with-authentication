@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-
+const User = require('../models/user')
 const taskSchema = new mongoose.Schema({
     completed: {
         type: Boolean,
@@ -8,6 +8,10 @@ const taskSchema = new mongoose.Schema({
         type: String,
         trim: true,
         required: true
+    },owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        // ref:'User',
+        required:true
     }
 })
 
