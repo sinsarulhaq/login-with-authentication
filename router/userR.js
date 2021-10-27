@@ -31,6 +31,28 @@ router.post('/users/login', async (req, res) => {
     }
 })
 
+router.post('/users/logout', auth, async(req, res)=>{
+     try{
+        req.user.tokens = req.user.tokens.filter((token)=>{
+            return token.token !== req.token
+        })
+        await req.user.save()
+        res.send({message:'logout from this device'})
+     }catch(e){
+        res.status(500).send()
+     }
+})
+
+router.post('/users/logoutall', auth, async(req, res)=>{
+    try{
+        req.user.token = []
+        await req.user.save()
+        res.send({message:'logout from all devices'})
+    }catch(e){
+        res.status(500).send(e)
+    }
+})
+
 router.get('/users/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
@@ -43,7 +65,7 @@ router.get('/users/:id', async (req, res) => {
     }
 })
 
-router.patch('/users/update/:id', async (req, res) => {
+router.patch('/users/update', auth, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowdeUpdate = ['name', 'email', 'password', 'age']
     const isValiOperation = updates.every((update) => {
@@ -53,7 +75,7 @@ router.patch('/users/update/:id', async (req, res) => {
         return res.status(400).send({ error: 'invalid updates' })
     }
     try {
-        const user = await User.findByIdAndUpdate(req.params.id, req.body)
+        const user = await User.findByIdAndUpdate(req.user._id, req.body)
         if (!user) {
             return res.status(404).send()
         }
@@ -63,9 +85,9 @@ router.patch('/users/update/:id', async (req, res) => {
     }
 })
 
-router.delete('/users/delete/:id', async (req, res) => {
+router.delete('/users/delete', auth, async (req, res) => {
     try {
-        const user = await User.findByIdAndDelete(req.params.id)
+        const user = await User.findByIdAndDelete(req.user._id)
         if (!user) {
             return res.status(404).send()
         }
