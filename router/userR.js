@@ -1,6 +1,7 @@
 const express = require('express')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
+const Task = require('../models/task')
 const router = new express.Router()
 
 
@@ -16,7 +17,7 @@ router.post('/users', async (req, res) => {
     }
 })
 
-router.get('/users/me', auth, async(req, res)=>{
+router.get('/users/me', auth, async (req, res) => {
     res.send(req.user)
 })
 
@@ -31,24 +32,24 @@ router.post('/users/login', async (req, res) => {
     }
 })
 
-router.post('/users/logout', auth, async(req, res)=>{
-     try{
-        req.user.tokens = req.user.tokens.filter((token)=>{
+router.post('/users/logout', auth, async (req, res) => {
+    try {
+        req.user.tokens = req.user.tokens.filter((token) => {
             return token.token !== req.token
         })
         await req.user.save()
-        res.send({message:'logout from this device'})
-     }catch(e){
+        res.send({ message: 'logout from this device' })
+    } catch (e) {
         res.status(500).send()
-     }
+    }
 })
 
-router.post('/users/logoutall', auth, async(req, res)=>{
-    try{
+router.post('/users/logoutall', auth, async (req, res) => {
+    try {
         req.user.token = []
         await req.user.save()
-        res.send({message:'logout from all devices'})
-    }catch(e){
+        res.send({ message: 'logout from all devices' })
+    } catch (e) {
         res.status(500).send(e)
     }
 })
@@ -87,10 +88,7 @@ router.patch('/users/update', auth, async (req, res) => {
 
 router.delete('/users/delete', auth, async (req, res) => {
     try {
-        const user = await User.findByIdAndDelete(req.user._id)
-        if (!user) {
-            return res.status(404).send()
-        }
+        await req.user.remove()
         res.status(201).send(user)
     } catch (e) {
         res.status(404).send(e)

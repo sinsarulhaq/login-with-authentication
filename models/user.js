@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
     }, password: {
         type: String,
         minlength: 7,
-        maxlength:68,
+        maxlength: 68,
         required: true,
         validate(value) {
             if (!value.includes(value)) {
@@ -46,15 +46,15 @@ const userSchema = new mongoose.Schema({
     }]
 })
 
-userSchema.virtual('tasks',{
-    ref:'Task',
-    localField:'_id',
-    foreignField:'owner'
+userSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id',
+    foreignField: 'owner'
 })
 
 userSchema.methods.toJSON = function () {
     const user = this
-    const userObject  = user.toObject()
+    const userObject = user.toObject()
     delete userObject.tokens
     delete userObject.password
 
@@ -62,7 +62,7 @@ userSchema.methods.toJSON = function () {
 }
 
 userSchema.methods.generateAuthToken = async function () {
-     const user = this
+    const user = this
     const token = jwt.sign({ _id: user._id.toString() }, 'thisismycode')
 
     user.tokens = user.tokens.concat({ token })
@@ -87,6 +87,12 @@ userSchema.pre('save', async function (next) {
     if (user.isModified('password')) {
         user.password = await bcrypt.hash(user.password, 8)
     }
+    next()
+})
+
+userSchema.pre('remove', async function (next) {
+    const user = this
+    await Task.deleteMany({ owner: user._id })
     next()
 })
 
